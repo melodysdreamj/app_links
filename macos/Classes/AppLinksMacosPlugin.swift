@@ -7,7 +7,7 @@ public class AppLinks {
   private init() {}
 }
 
-public class AppLinksMacosPlugin: FlutterAppDelegate, FlutterPlugin, FlutterStreamHandler {
+public class AppLinksMacosPlugin: NSObject, FlutterPlugin, FlutterStreamHandler, FlutterAppLifecycleDelegate {
   private var eventSink: FlutterEventSink?
   private var initialLink: String?
   private var latestLink: String?
@@ -21,14 +21,14 @@ public class AppLinksMacosPlugin: FlutterAppDelegate, FlutterPlugin, FlutterStre
 
     let eventChannel = FlutterEventChannel(name: "com.llfbandit.app_links/events", binaryMessenger: registrar.messenger)
     eventChannel.setStreamHandler(instance)
-    
+
     registrar.addApplicationDelegate(instance)
   }
   
   public func getUniversalLink(_ userActivity: NSUserActivity) -> URL? {
     guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
         let url = userActivity.webpageURL,
-        let components = NSURLComponents(url: url, resolvingAgainstBaseURL: true) else {
+        let _ = NSURLComponents(url: url, resolvingAgainstBaseURL: true) else {
         return nil
     }
     
@@ -36,7 +36,7 @@ public class AppLinksMacosPlugin: FlutterAppDelegate, FlutterPlugin, FlutterStre
   }
 
   // Custom URL schemes
-  public override func applicationDidFinishLaunching(_ notification: Notification) {
+  public func handleWillFinishLaunching(_ notification: Notification) {
     NSAppleEventManager.shared().setEventHandler(
       self,
       andSelector: #selector(handleEvent(_:with:)),
@@ -44,21 +44,20 @@ public class AppLinksMacosPlugin: FlutterAppDelegate, FlutterPlugin, FlutterStre
       andEventID: AEEventID(kAEGetURL)
     )
   }
-
-
-  // Universal Links
-  public override func application(_ application: NSApplication,
-                                   continue userActivity: NSUserActivity,
-                                   restorationHandler: @escaping ([any NSUserActivityRestoring]) -> Void) -> Bool {
-
-    guard let url = getUniversalLink(userActivity) else {
-      return false
-    }
-    
-    handleLink(link: url.absoluteString)
-    
-    return false
-  }
+  
+  // Universal links
+//  public override func application(_ application: NSApplication,
+//                                   continue userActivity: NSUserActivity,
+//                                   restorationHandler: @escaping ([any NSUserActivityRestoring]) -> Void) -> Bool {
+//
+//    guard let url = getUniversalLink(userActivity) else {
+//      return false
+//    }
+//    
+//    handleLink(link: url.absoluteString)
+//    
+//    return false
+//  }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
