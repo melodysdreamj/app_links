@@ -28,6 +28,13 @@ public class AppLinksMacosPlugin: NSObject, FlutterPlugin, FlutterStreamHandler,
     )
   }
 
+  public func handleOpen(_ urls: [URL]) -> Bool {
+    for url in urls {
+      handleLink(link: url.absoluteString)
+    }
+    
+    return false
+  }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
